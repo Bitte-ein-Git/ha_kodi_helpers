@@ -1,20 +1,36 @@
 import aiohttp
 import async_timeout
+from urllib.parse import quote
 
 class KodiAPI:
-    def __init__(self, host, port, username, password, ssl=False):
-        protocol = "https" if ssl else "http"
-        self._url = f"{protocol}://{host}:{port}/jsonrpc"
-        self._auth = aiohttp.BasicAuth(username, password) if username else None
-        self._session = aiohttp.ClientSession(auth=self._auth)
+    def __init__(self, host, port, username, password, scheme='http'):
+        self.host = host
+        self.port = port
+        self.username = username or ''
+        self.password = password or ''
+        self.scheme = scheme or 'http'
+        self._build_url()
 
-    async def _post(self, payload):
+    def _build_url(self):
+        auth = ''
+        if self.username or self.password:
+            auth = f"{quote(self.username)}:{quote(self.password)}@"
+        self._url = f"{self.scheme}://{auth}{self.host}:{self.port}/jsonrpc"
+
+    def set_scheme(self, scheme: str):
+        self.scheme = scheme
+        self._build_url()
+
+    async def _post(self, payload, timeout=5):
         async with aiohttp.ClientSession() as session:
-            with async_timeout.timeout(5):
-                async with session.post(self._url, json=payload) as resp:
-                    if resp.status == 200:
-                        return await resp.json()
-                    return None
+            try:
+                with async_timeout.timeout(timeout):
+                    async with session.post(self._url, json=payload) as resp:
+                        if resp.status == 200:
+                            return await resp.json()
+                        return None
+            except Exception:
+                return None
 
     async def get_player(self):
         return await self._post({"jsonrpc": "2.0", "id": 1, "method": "Player.GetActivePlayers"})
@@ -44,6 +60,9 @@ class KodiAPI:
                 "properties": ["audiostreams", "currentaudiostream"]
             }
         })
+
+    async def get_app_properties(self):
+        return await self._post({"jsonrpc": "2.0", "id": 1, "method": "Application.GetProperties", "params": {"properties": ["name","version"]}})
 
     async def ping(self):
         return await self._post({"jsonrpc": "2.0", "id": 1, "method": "JSONRPC.Ping"})
