@@ -1,19 +1,11 @@
 {
   "domain": "kodi_helpers",
   "name": "🍿• Kodi-Helpers",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "documentation": "https://github.com/Bitte-ein-Git/ha_kodi_helpers",
-  "requirements": [
-    "aiohttp",
-    "async_timeout"
-  ],
-  "codeowners": [
-    "@Bitte-ein-Git",
-    "@elias1731"
-  ],
+  "requirements": [],
+  "codeowners": ["@Bitte-ein-Git", "@elias1731"],
   "config_flow": true,
   "iot_class": "local_polling",
-  "integration_type": "hub",
-  "issues_url": "https://github.com/Bitte-ein-Git/ha_kodi_helpers/issues",
-  "quality_scale": "internal"
+  "icon": "mdi:kodi"
 }
