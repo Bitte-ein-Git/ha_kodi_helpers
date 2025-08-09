@@ -10,7 +10,6 @@ class KodiHelpersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None) -> FlowResult:
         errors = {}
         if user_input is not None:
-            # default scheme to http if not provided
             data = dict(user_input)
             data.setdefault("scheme", "http")
             return self.async_create_entry(title=f"🍿• Kodi-Helper ({data.get('host')})", data=data)

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from datetime import timedelta
 from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
 from .api import KodiAPI
@@ -20,10 +20,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
     api = KodiAPI(cfg['host'], cfg.get('port', 8080), cfg.get('username'), cfg.get('password'), scheme=cfg.get('scheme','http'))
 
     async def async_update_data():
-        # Check app properties to get device name and availability
         app = await api.get_app_properties()
         if not app or 'result' not in app:
-            # Kodi unreachable
             return {
                 'available': False,
                 'media_type': 'Keine Wiedergabe',
@@ -57,7 +55,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         if item_data and 'result' in item_data:
             item = item_data['result']['item']
-            # Live TV (channeltype == 'tv' or presence of 'channel')
             if item.get('channeltype') == 'tv' or item.get('channel'):
                 media_type = 'Live TV'
                 main_info = item.get('channel') or '📺 Live TV'
@@ -108,8 +105,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
 
-    # store coordinator so other platforms can access API if needed (e.g., the switch)
-    hass.data[DOMAIN][entry.entry_id+'_coordinator'] = coordinator
+    hass.data[DOMAIN][entry.entry_id + '_coordinator'] = coordinator
 
     await coordinator.async_config_entry_first_refresh()
 
@@ -135,7 +131,6 @@ class KodiHelpersSensor(SensorEntity):
 
     @property
     def device_info(self):
-        # Put all sensors under one device (the kodi instance)
         return {
             'identifiers': {(DOMAIN, self.entry.entry_id)},
             'name': self.coordinator.data.get('device_name', f"🍿• Kodi-Helper ({self.entry.data.get('host')})"),
