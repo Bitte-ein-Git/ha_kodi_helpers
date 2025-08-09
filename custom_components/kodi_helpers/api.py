@@ -1,5 +1,5 @@
-# In deiner api.py Datei
 import aiohttp
+import async_timeout
 
 class KodiAPI:
     def __init__(self, host, port, username, password, ssl=False):
@@ -8,16 +8,42 @@ class KodiAPI:
         self._auth = aiohttp.BasicAuth(username, password) if username else None
         self._session = aiohttp.ClientSession(auth=self._auth)
 
-    # ... Rest deiner API-Methoden wie ping, get_player, etc.
-    # Sie sollten alle self._session und self._url verwenden.
-    
-    async def ping(self):
-        # Beispiel für eine Methode
-        try:
-            payload = {"jsonrpc": "2.0", "method": "JSONRPC.Ping", "id": 1}
-            async with self._session.post(self._url, json=payload, timeout=5) as response:
-                return response.status == 200 and await response.json() == {"id":1,"jsonrpc":"2.0","result":"pong"}
-        except Exception:
-            return False
+    async def _post(self, payload):
+        async with aiohttp.ClientSession() as session:
+            with async_timeout.timeout(5):
+                async with session.post(self._url, json=payload) as resp:
+                    if resp.status == 200:
+                        return await resp.json()
+                    return None
 
-    # ... deine anderen Methoden
+    async def get_player(self):
+        return await self._post({"jsonrpc": "2.0", "id": 1, "method": "Player.GetActivePlayers"})
+
+    async def get_item(self, playerid):
+        return await self._post({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "Player.GetItem",
+            "params": {
+                "playerid": playerid,
+                "properties": [
+                    "title", "showtitle", "season", "episode", "year",
+                    "tvshowid", "file", "streamdetails", "art",
+                    "channel", "channeltype"
+                ]
+            }
+        })
+
+    async def get_audio_info(self, playerid):
+        return await self._post({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "Player.GetProperties",
+            "params": {
+                "playerid": playerid,
+                "properties": ["audiostreams", "currentaudiostream"]
+            }
+        })
+
+    async def ping(self):
+        return await self._post({"jsonrpc": "2.0", "id": 1, "method": "JSONRPC.Ping"})
