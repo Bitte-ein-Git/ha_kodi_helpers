@@ -1,4 +1,4 @@
-[![ADD][hacs1]](https://my.home-assistant.io/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration) • [![ADD][setup1]](https://my.home-assistant.io/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration)
+[![ADD][hacs1]](https://my.home-assistant.io/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration) [![ADD][setup1]](https://my.home-assistant.io/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration)
 
 <!--
 <p align="center">
