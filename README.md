@@ -1,14 +1,17 @@
-[![HACS][hacsbadge]](https://hacs.xyz) [![ADD][hacs1]](https://my.home-assistant.io/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration) [![ADD][setup1]](https://my.home-assistant.io/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration)
+[![ADD][hacs1]](https://my.home-assistant.io/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration) • [![ADD][setup1]](https://my.home-assistant.io/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration)
 
+<!--
 <p align="center">
   <img src="img/repo.png" alt="Logo">
 </p>
+-->
 
 🗿• [My kodi helper sensors](https://github.com/Bitte-ein-Git/ha_kodi_helpers) for homeassistant
 
 `» Media infos such as audio codec or active pvr channel`
-
 <hr>
+
+› Also visit my "[*Discord Rich Presence via Home Assistant*](https://github.com/Bitte-ein-Git/kodi-repo/tree/master/repo/zips/service.dc_ha_presence)" Kodi-Addon at my [Kodi Repo](https://github.com/Bitte-ein-Git/kodi-repo)
 
 ## Installation (Easy)
 [![ADD][hacs2]](https://my.home-assistant.io/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration)
@@ -36,7 +39,9 @@
 
 2. Select "**🍿• Kodi-Helpers**".
 
-### 
+<hr>
+
+[![HACS][hacsbadge]](https://hacs.xyz)
 
 # License
 
