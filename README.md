@@ -18,7 +18,7 @@
    - URL: `Bitte-ein-Git/ha_kodi_helpers`
    - Type: Integration
 
-2. Select "**🍿• Kodi-Helpers**".
+2. Select "**Kodi-Helpers 🍿**".
 
 <hr>
 
@@ -34,7 +34,7 @@
    - Select "**Devices & services**"
    - At the bottom right select "**+ Add integration**"
 
-2. Select "**🍿• Kodi-Helpers**".
+2. Select "**Kodi-Helpers 🍿**".
 
 ### 
 
