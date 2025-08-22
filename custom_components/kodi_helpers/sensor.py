@@ -1,9 +1,9 @@
 from __future__ import annotations
 import logging
 from datetime import timedelta
+import re
 
 from homeassistant.components.sensor import SensorEntity
-# HIER IST DIE WICHTIGE ERGÄNZUNG
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator, UpdateFailed
 
 from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
@@ -19,14 +19,12 @@ SENSOR_TYPES = {
 }
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    # Die Logik zum Erstellen des Koordinators bleibt unverändert
     cfg = hass.data[DOMAIN][entry.entry_id]
     api = KodiAPI(cfg['host'], cfg.get('port', 8080), cfg.get('username'), cfg.get('password'), scheme=cfg.get('scheme','http'))
 
     async def async_update_data():
         app = await api.get_app_properties()
         if not app or 'result' not in app:
-            # Wenn Kodi nicht erreichbar ist, wird der Sensor als "unavailable" markiert
             raise UpdateFailed("Kodi ist nicht erreichbar.")
 
         device_name = app['result'].get('name') or f"🍿• Kodi-Helper ({cfg.get('host')})"
@@ -41,15 +39,28 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         if item_data and 'result' in item_data:
             item = item_data['result']['item']
+            
             if item.get('channeltype') == 'tv' or item.get('channel'):
-                media_type, main_info, extra_info = 'Live TV', item.get('channel') or '📺 Live TV', item.get('title') or '🎬 Live TV'
+                media_type = 'Live TV'
+                main_info = (item.get('channel') or '📺 Live TV') + ' ᴵᴾᵀⱽ'
+                extra_info = item.get('title') or '🎬 Live TV'
             elif item.get('type') == 'movie':
-                media_type, main_info, extra_info = 'Movie', f"{item.get('title','')} ({item.get('year','')})".strip(), '🎬 Film'
+                media_type = 'Movie'
+                main_info = f"{item.get('title','')} ({item.get('year','')})".strip()
+                extra_info = '🎬 Film'
             elif item.get('type') == 'episode' or item.get('tvshowid'):
-                media_type, main_info = 'TV Show', f"{item.get('showtitle','')} ({item.get('year','')})".strip()
+                media_type = 'TV Show'
+                main_info = f"{item.get('showtitle','')} ({item.get('year','')})".strip()
                 extra_info = f"S{int(item['season']):02d}E{int(item['episode']):02d} » {item.get('title','')}" if item.get('season') is not None and item.get('episode') is not None else '🎞️ Serie'
             else:
                 media_type, main_info, extra_info = 'Other', item.get('label') or 'Keine Wiedergabe', 'Other'
+
+            if 'S-1E-1' in extra_info:
+                extra_info = ''
+
+            no_tags = re.sub(r'\[.*?\]', '', main_info)
+            no_zero = re.sub(r'\s*\(0\)', '', no_tags)
+            main_info = no_zero.strip()
 
         if audio_data and 'result' in audio_data and audio_data['result'].get('audiostreams'):
             streams = audio_data['result'].get('audiostreams', [])
@@ -80,21 +91,17 @@ async def async_setup_entry(hass, entry, async_add_entities):
     entities = [KodiHelpersSensor(coordinator, entry, key) for key in SENSOR_TYPES]
     async_add_entities(entities)
 
-# Die Sensor-Klasse wird angepasst
 class KodiHelpersSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator, entry, key):
-        # super().__init__() stellt die Verknüpfung zum Koordinator her
         super().__init__(coordinator)
         self.entry = entry
         self._key = key
-        # Der Name wird jetzt direkt hier gesetzt, da er sich nicht ändert
         self._attr_name = f"{coordinator.data.get('device_name','Kodi')} - {SENSOR_TYPES[key]['name']}"
         self._attr_icon = SENSOR_TYPES[key]['icon']
         self._attr_unique_id = f"{entry.entry_id}_{key}"
 
     @property
     def native_value(self):
-        # Greift auf die vom Koordinator bereitgestellten Daten zu
         return self.coordinator.data.get(self._key)
 
     @property
@@ -107,6 +114,3 @@ class KodiHelpersSensor(CoordinatorEntity, SensorEntity):
             'model': 'Kodi',
             'configuration_url': f"{scheme}://{self.entry.data.get('host')}:{self.entry.data.get('port',8080)}"
         }
-
-    # Die Methoden async_update, should_poll und available sind nicht mehr nötig.
-    # Das übernimmt alles die CoordinatorEntity für uns.
