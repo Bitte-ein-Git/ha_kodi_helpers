@@ -1,9 +1,4 @@
 {
   "name": "Kodi-Helpers 🍿",
-  "repository": "Bitte-ein-Git/ha_kodi_helpers",
-  "domains": [
-    "kodi_helpers"
-  ],
-  "homeassistant": "2024.12.0",
-  "render_readme": true
+  "homeassistant": "2025.7.1"
 }
