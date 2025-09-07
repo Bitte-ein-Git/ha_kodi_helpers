@@ -39,23 +39,36 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         if item_data and 'result' in item_data:
             item = item_data['result']['item']
-            
-            if item.get('channeltype') == 'tv' or item.get('channel'):
-                media_type = 'Live TV'
-                main_info = (item.get('channel') or '📺 Live TV') + ' ᴵᴾᵀⱽ'
-                extra_info = item.get('title') or '🎬 Live TV'
-            elif item.get('type') == 'movie':
-                media_type = 'Movie'
-                main_info = f"{item.get('title','')} ({item.get('year','')})".strip()
-                extra_info = '🎬 Film'
-            elif item.get('type') == 'episode' or item.get('tvshowid'):
-                media_type = 'TV Show'
-                main_info = f"{item.get('showtitle','')} ({item.get('year','')})".strip()
-                extra_info = f"S{int(item['season']):02d}E{int(item['episode']):02d} » {item.get('title','')}" if item.get('season') is not None and item.get('episode') is not None else '🎞️ Serie'
-            else:
-                media_type, main_info, extra_info = 'Other', item.get('label') or 'Keine Wiedergabe', 'Other'
+
+            if not item.get('title') and item.get('label'):
+                # label parsing
+                label = item.get('label')
+                match = re.match(r'^(.*)\sS(\d{1,2})E(\d{1,2})', label, re.IGNORECASE)
+                if match:
+                    # tv show detected
+                    media_type = 'TV Show'
+                    main_info = match.group(1).strip()
+                    extra_info = f"S{int(match.group(2)):02d}E{int(match.group(3)):02d}"
+
+            if not main_info:
+                # default processing
+                if item.get('channeltype') == 'tv' or item.get('channel'):
+                    media_type = 'Live TV'
+                    main_info = (item.get('channel') or '📺 Live TV') + ' ᴵᴾᵀⱽ'
+                    extra_info = item.get('title') or '🎬 Live TV'
+                elif item.get('type') == 'movie':
+                    media_type = 'Movie'
+                    main_info = f"{item.get('title','')} ({item.get('year','')})".strip()
+                    extra_info = '🎬 Film'
+                elif item.get('type') == 'episode' or item.get('tvshowid'):
+                    media_type = 'TV Show'
+                    main_info = f"{item.get('showtitle','')} ({item.get('year','')})".strip()
+                    extra_info = f"S{int(item['season']):02d}E{int(item['episode']):02d} » {item.get('title','')}" if item.get('season') is not None and item.get('episode') is not None else '🎞️ Serie'
+                else:
+                    media_type, main_info, extra_info = 'Other', item.get('label') or 'Keine Wiedergabe', 'Other'
 
             if 'S-1E-1' in extra_info:
+                # extra info cleanup
                 extra_info = ''
 
             no_tags = re.sub(r'\[.*?\]', '', main_info)
@@ -63,6 +76,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             main_info = no_zero.strip()
 
         if audio_data and 'result' in audio_data and audio_data['result'].get('audiostreams'):
+            # audio info
             streams = audio_data['result'].get('audiostreams', [])
             current = audio_data['result'].get('currentaudiostream', {}).get('index')
             if current is not None and current < len(streams):
