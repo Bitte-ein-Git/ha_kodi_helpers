@@ -1,6 +1,6 @@
 from __future__ import annotations
 import logging
-from datetime import timedelta
+from datetime import timedelta, datetime
 import re
 
 from homeassistant.components.sensor import SensorEntity
@@ -8,6 +8,12 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpda
 
 from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
 from .api import KodiAPI
+
+# Third-party library for IMDb access
+try:
+    from imdb import Cinemagoer
+except ImportError:
+    Cinemagoer = None
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,6 +27,9 @@ SENSOR_TYPES = {
 async def async_setup_entry(hass, entry, async_add_entities):
     cfg = hass.data[DOMAIN][entry.entry_id]
     api = KodiAPI(cfg['host'], cfg.get('port', 8080), cfg.get('username'), cfg.get('password'), scheme=cfg.get('scheme','http'))
+    
+    # Initialize Cinemagoer instance
+    ia = Cinemagoer() if Cinemagoer else None
 
     async def async_update_data():
         app = await api.get_app_properties()
@@ -30,7 +39,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         device_name = app['result'].get('name') or f"🍿• Kodi-Helper ({cfg.get('host')})"
         players = await api.get_player()
         if not players or not players.get('result'):
-            return {'media_type': 'Keine Wiedergabe', 'main_info': 'Keine Wiedergabe', 'extra_info': 'Keine Wiedergabe', 'audio_info': 'Keine Audio-Infos', 'device_name': device_name}
+            return {'media_type': 'Keine Wiedergabe', 'main_info': 'Keine Wiedergabe', 'extra_info': ' ', 'audio_info': 'Keine Audio-Infos', 'device_name': device_name}
 
         playerid = players['result'][0]['playerid']
         item_data = await api.get_item(playerid)
@@ -39,21 +48,48 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         if item_data and 'result' in item_data:
             item = item_data['result']['item']
-            
-            if item.get('channeltype') == 'tv' or item.get('channel'):
-                media_type = 'Live TV'
-                main_info = (item.get('channel') or '📺 Live TV') + ' ᴵᴾᵀⱽ'
-                extra_info = item.get('title') or '🎬 Live TV'
-            elif item.get('type') == 'movie':
-                media_type = 'Movie'
-                main_info = f"{item.get('title','')} ({item.get('year','')})".strip()
-                extra_info = '🎬 Film'
-            elif item.get('type') == 'episode' or item.get('tvshowid'):
-                media_type = 'TV Show'
-                main_info = f"{item.get('showtitle','')} ({item.get('year','')})".strip()
-                extra_info = f"S{int(item['season']):02d}E{int(item['episode']):02d} » {item.get('title','')}" if item.get('season') is not None and item.get('episode') is not None else '🎞️ Serie'
-            else:
-                media_type, main_info, extra_info = 'Other', item.get('label') or 'Keine Wiedergabe', 'Other'
+            year = item.get('year')
+
+            if not item.get('title') and item.get('label'):
+                label = item.get('label')
+                match = re.match(r'^(.*)\sS(\d{1,2})E(\d{1,2})', label, re.IGNORECASE)
+                if match:
+                    media_type = 'TV Show'
+                    main_info = match.group(1).strip()
+                    extra_info = f"S{int(match.group(2)):02d}E{int(match.group(3)):02d}"
+
+            if not main_info:
+                if item.get('channeltype') == 'tv' or item.get('channel'):
+                    media_type = 'Live TV'
+                    main_info = (item.get('channel') or '📺 Live TV') + ' ᴵᴾᵀⱽ'
+                    extra_info = item.get('title') or '🎬 Live TV'
+                elif item.get('type') == 'movie':
+                    media_type = 'Movie'
+                    main_info = f"{item.get('title','')} ({year})".strip()
+                    extra_info = '🎬 Film'
+                elif item.get('type') == 'episode' or item.get('tvshowid'):
+                    media_type = 'TV Show'
+                    show_title = item.get('showtitle', '')
+                    
+                    # IMDb year correction
+                    current_year = datetime.now().year
+                    if ia and year and year > current_year:
+                        try:
+                            _LOGGER.debug(f"Incorrect year '{year}' for '{show_title}'. Querying IMDb.")
+                            search_results = await hass.async_add_executor_job(ia.search_movie, show_title)
+                            if search_results:
+                                movie = search_results[0]
+                                await hass.async_add_executor_job(ia.update, movie)
+                                if movie.get('year'):
+                                    year = movie.get('year')
+                                    _LOGGER.debug(f"IMDb corrected year to '{year}' for '{show_title}'.")
+                        except Exception as e:
+                            _LOGGER.warning(f"IMDb search failed for '{show_title}': {e}")
+
+                    main_info = f"{show_title} ({year})".strip()
+                    extra_info = f"S{int(item['season']):02d}E{int(item['episode']):02d} » {item.get('title','')}" if item.get('season') is not None and item.get('episode') is not None else '🎞️ Serie'
+                else:
+                    media_type, main_info, extra_info = 'Other', item.get('label') or ' ', 'Other'
 
             if 'S-1E-1' in extra_info:
                 extra_info = ''

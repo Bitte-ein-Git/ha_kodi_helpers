@@ -1,9 +1,9 @@
 {
   "domain": "kodi_helpers",
   "name": "Kodi-Helpers 🍿",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "documentation": "https://github.com/Bitte-ein-Git/ha_kodi_helpers",
-  "requirements": [],
+  "requirements": ["cinemagoer==2023.11.26"],
   "codeowners": ["@Bitte-ein-Git", "@elias1731"],
   "config_flow": true,
   "iot_class": "local_polling",
