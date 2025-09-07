@@ -1,11 +1,11 @@
 {
   "domain": "kodi_helpers",
   "name": "Kodi-Helpers 🍿",
-  "version": "1.4.0",
-  "documentation": "https://github.com/Bitte-ein-Git/ha_kodi_helpers",
-  "requirements": [],
   "codeowners": ["@Bitte-ein-Git", "@elias1731"],
   "config_flow": true,
-  "iot_class": "local_polling",
-  "icon": "mdi:kodi"
+  "documentation": "https://github.com/Bitte-ein-Git/ha_kodi_helpers",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/Bitte-ein-Git/ha_kodi_helpers/issues",
+  "requirements": [],
+  "version": "1.4.1"
 }
