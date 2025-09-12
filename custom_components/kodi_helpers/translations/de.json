@@ -1,3 +1,12 @@
 {
-  "title": "Kodi-Helpers 🍿"
+  "title": "Kodi-Helpers 🍿",
+  "state": {
+    "no_playback": "Keine Wiedergabe",
+    "no_audio_info": "Keine Audio-Infos",
+    "kodi_offline": "Kodi offline",
+    "stereo": "Stereo",
+    "channel_5_1": "5.1-Kanal",
+    "channel_7_1": "7.1-Kanal",
+    "channel_multi": "{channels}-Kanal"
+  }
 }
