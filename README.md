@@ -1,17 +1,20 @@
 [![ADD][hacs1]](https://ha-link.heyfordy.de/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration) [![SETUP][setup1]](https://ha-link.heyfordy.de/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration)
 
-<!--
-<p align="center">
-  <img src="img/repo.png" alt="Logo">
-</p>
--->
+<div align="center">
+  <br>
+  <img src="https://raw.githubusercontent.com/Bitte-ein-Git/ha_kodi_helpers/refs/heads/main/img/repo.png" alt="Logo" width="256">
+  <br><br>
 
-🗿• [My kodi helper sensors](https://github.com/Bitte-ein-Git/ha_kodi_helpers) for homeassistant
+  <h1>🗿• Kodi-Helpers 🍿</br>
+      Home Assistant Integration</h1>
 
-`» Media infos such as audio codec or active pvr channel`
-<hr>
+`» Audio: Added infos for codec & channel count`
 
-› Also visit my "[*Discord Rich Presence via Home Assistant*](https://github.com/Bitte-ein-Git/kodi-repo/tree/master/repo/zips/service.dc_ha_presence)" Kodi-Addon at my [Kodi Repo](https://github.com/Bitte-ein-Git/kodi-repo)
+`» Playback: Added alternative ways to show missing metadata`
+
+`» PVR: Added Live-TV infos —›`***`channel`***` & `***`TV program`***`.`
+
+</div>
 
 ## Installation (Easy)
 [![ADD][hacs2]](https://ha-link.heyfordy.de/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration)
