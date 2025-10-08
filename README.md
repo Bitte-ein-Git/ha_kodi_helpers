@@ -1,12 +1,20 @@
-[![ADD][hacs1]](https://ha-link.heyfordy.de/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration) [![SETUP][setup1]](https://ha-link.heyfordy.de/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration)
-
 <div align="center">
   <br>
   <img src="img/repo.png" alt="Logo" width="256">
   <br><br>
+</div>
 
-  <h1>🗿• Kodi-Helpers 🍿</br>
-      Home Assistant Integration</h1>
+<div id="toc">
+  <ul align="center" style="list-style: none">
+    <summary>
+      <h1 style="border-bottom: 0; display: inline-block;">
+        <b>🗿• Kodi-Helpers 🍿</b></br>
+          <sub><i><u>Home Assistant Integration</i> 🏡</u></sub></h1>
+    </summary>
+  </ul>
+</div>
+
+<div align="center">
 
 `» Audio: Added infos for codec & channel count`
 
@@ -33,7 +41,7 @@
 > After installation you **have to restart Home Assistant**
 
 ### Easy Configuration (Link to Config Screen)
-[![ADD][setup2]](https://ha-link.heyfordy.de/redirect/hacs_repository/?owner=Bitte-ein-Git&repository=ha_kodi_helpers&category=integration)
+[![ADD][setup2]](https://ha-link.heyfordy.de/redirect/config_flow_start/?domain=kodi_helpers)
 ### Manual Configuration
 1. Add a new config entry via UI:
    - Go to your Home Assistant **Settings**

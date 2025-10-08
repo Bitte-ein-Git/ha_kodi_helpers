@@ -7,6 +7,8 @@
     "stereo": "Stereo",
     "channel_5_1": "5.1-Kanal",
     "channel_7_1": "7.1-Kanal",
-    "channel_multi": "{channels}-Kanal"
+    "channel_multi": "{channels}-Kanal",
+    "movie": "🎬 Film",
+    "tv_show": "🎞️ Serie"
   }
 }
