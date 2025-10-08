@@ -83,7 +83,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 label = item.get('label')
                 match = re.match(r'^(.*)\sS(\d{1,2})E(\d{1,2})', label, re.IGNORECASE)
                 if match:
-                    media_type = 'TV Show'
+                    media_type = get_translation('tv_show')
                     main_info = match.group(1).strip()
                     extra_info = f"S{int(match.group(2)):02d}E{int(match.group(3)):02d}"
 
@@ -94,11 +94,14 @@ async def async_setup_entry(hass, entry, async_add_entities):
                     main_info = (item.get('channel') or '📺 Live TV') + ' ᴵᴾᵀⱽ'
                     extra_info = item.get('title') or '🎬 Live TV'
                 elif item.get('type') == 'movie':
-                    media_type = 'Movie'
+                    media_type = get_translation('movie')
                     main_info = f"{item.get('title','')} ({item.get('year','')})".strip()
                     extra_info = '🎬 Film'
                 elif item.get('type') == 'episode' or item.get('tvshowid'):
-                    media_type = 'TV Show'
+                    if item.get('season') == -1 and item.get('episode') == -1:
+                        media_type = get_translation('movie')
+                    else:
+                        media_type = get_translation('tv_show')
                     main_info = f"{item.get('showtitle','')} ({item.get('year','')})".strip()
                     extra_info = f"S{int(item['season']):02d}E{int(item['episode']):02d} » {item.get('title','')}" if item.get('season') is not None and item.get('episode') is not None else '🎞️ Serie'
                 else:
@@ -129,8 +132,27 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 }
                 channel_str = channel_str_map.get(channels, get_translation('channel_multi', {"channels": str(channels)}))
 
-                codec_map = {'ac3':'Dolby Digital','eac3':'Dolby Digital+','dts':'DTS','aac':'AAC'}
-                codec_str = codec_map.get(codec, codec.upper())
+                codec_map = {
+                    'ac3': 'Dolby Digital',
+                    'eac3': 'Dolby Digital+',
+                    'dts': 'DTS',
+                    'aac': 'AAC',
+                    'dca': 'DTS',
+                    'dolbydigital': 'Dolby Digital',
+                    'dtshd_hra': 'DTS-HD HRA',
+                    'dtshd_ma': 'DTS-HD MA',
+                    'dtshd_ma_x': 'DTS-HD MA X',
+                    'dtshd_ma_x_ima': 'DTS-HD MA X (IMAX)',
+                    'dtsma': 'DTS Master Audio',
+                    'eac3_ddp_atmos': 'Dolby Atmos (DD+)',
+                    'truehd': 'Dolby TrueHD',
+                    'truehd_atmos': 'Dolby Atmos+TrueHD'
+                }
+
+                if codec.startswith('pcm'):
+                    codec_str = 'PCM'
+                else:
+                    codec_str = codec_map.get(codec, codec.upper())
                 audio_info = f"{codec_str} | {channel_str}"
             else:
                 audio_info = no_audio_state
