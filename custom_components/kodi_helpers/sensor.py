@@ -100,10 +100,12 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 elif item.get('type') == 'episode' or item.get('tvshowid'):
                     if item.get('season') == -1 and item.get('episode') == -1:
                         media_type = get_translation('movie')
+                        main_info = item.get('label')
+                        extra_info = get_translation('movie')
                     else:
                         media_type = get_translation('tv_show')
-                    main_info = f"{item.get('showtitle','')} ({item.get('year','')})".strip()
-                    extra_info = f"S{int(item['season']):02d}E{int(item['episode']):02d} » {item.get('title','')}" if item.get('season') is not None and item.get('episode') is not None else '🎞️ Serie'
+                        main_info = f"{item.get('showtitle','')} ({item.get('year','')})".strip()
+                        extra_info = f"S{int(item['season']):02d}E{int(item['episode']):02d} » {item.get('title','')}" if item.get('season') is not None and item.get('episode') is not None else '🎞️ Serie'
                 else:
                     media_type, main_info, extra_info = 'Other', item.get('label') or no_playback_state, 'Other'
 
