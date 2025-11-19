@@ -9,6 +9,8 @@
     "channel_7_1": "7.1-Channel",
     "channel_multi": "{channels}-Channel",
     "movie": "🎬 Movie",
-    "tv_show": "🎞️ TV Show"
+    "tv_show": "🎞️ TV Show",
+    "live_tv": "📺 Live TV",
+    "keyboard": "⌨️ Keyboard"
   }
 }
