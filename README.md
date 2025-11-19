@@ -1,6 +1,6 @@
 <div align="center">
   <br>
-  <img src="img/repo.png" alt="Logo" width="256">
+  <img src="https://github.com/Bitte-ein-Git/ha_kodi_helpers/blob/main/img/repo.png" alt="Logo" width="256">
   <br><br>
 </div>
 

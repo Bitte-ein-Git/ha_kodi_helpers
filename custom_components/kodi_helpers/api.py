@@ -63,6 +63,9 @@ class KodiAPI:
 
     async def get_app_properties(self):
         return await self._post({"jsonrpc": "2.0", "id": 1, "method": "Application.GetProperties", "params": {"properties": ["name","version"]}})
+        
+    async def get_gui_properties(self):
+        return await self._post({"jsonrpc": "2.0", "id": 1, "method": "GUI.GetProperties", "params": {"properties": ["currentwindow"]}})
 
     async def ping(self):
         return await self._post({"jsonrpc": "2.0", "id": 1, "method": "JSONRPC.Ping"})

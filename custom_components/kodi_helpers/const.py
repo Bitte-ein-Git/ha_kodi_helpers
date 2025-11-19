@@ -1,5 +1,5 @@
 DOMAIN = "kodi_helpers"
-PLATFORMS = ["sensor"]
+PLATFORMS = ["sensor", "binary_sensor", "image"]
 
 DEFAULT_PORT = 8080
 DEFAULT_USERNAME = "kodi"
