@@ -11,6 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: Bitte-ein-Git/action_clear-runs@main
+        with:
+          mode: 'repo'
+          debug: 'true'
 
   validate-hassfest:
     name: ☑️ Validate with hassfest
