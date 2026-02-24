@@ -13,9 +13,12 @@ class KodiHelpersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # default scheme to http if not provided
             data = dict(user_input)
             data.setdefault("scheme", "http")
-            return self.async_create_entry(title=f"🍿• Kodi-Helpers ({data.get('host')})", data=data)
+            # use friendly_name for title
+            fname = data.get("friendly_name", data.get("host"))
+            return self.async_create_entry(title=f"🍿• {fname}", data=data)
 
         data_schema = vol.Schema({
+            vol.Required("friendly_name", default="Kodi"): str,
             vol.Required("host"): str,
             vol.Optional("port", default=DEFAULT_PORT): int,
             vol.Optional("username", default=DEFAULT_USERNAME): str,

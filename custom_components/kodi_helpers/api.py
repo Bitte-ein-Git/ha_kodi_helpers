@@ -36,6 +36,7 @@ class KodiAPI:
         return await self._post({"jsonrpc": "2.0", "id": 1, "method": "Player.GetActivePlayers"})
 
     async def get_item(self, playerid):
+        # request additional music and chapter metadata
         return await self._post({
             "jsonrpc": "2.0",
             "id": 1,
@@ -45,19 +46,20 @@ class KodiAPI:
                 "properties": [
                     "title", "showtitle", "season", "episode", "year",
                     "tvshowid", "file", "streamdetails", "art",
-                    "channel", "channeltype"
+                    "channel", "channeltype", "artist", "album"
                 ]
             }
         })
 
     async def get_audio_info(self, playerid):
+        # request currentchapter and chapters for video playback
         return await self._post({
             "jsonrpc": "2.0",
             "id": 1,
             "method": "Player.GetProperties",
             "params": {
                 "playerid": playerid,
-                "properties": ["audiostreams", "currentaudiostream"]
+                "properties": ["audiostreams", "currentaudiostream", "currentchapter", "chapters"]
             }
         })
 

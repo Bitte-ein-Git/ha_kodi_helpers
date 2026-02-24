@@ -1,6 +1,7 @@
 from __future__ import annotations
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util import slugify
 from .const import DOMAIN
 
 SENSOR_TYPES = {
@@ -20,13 +21,17 @@ class KodiHelpersSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.entry = entry
         self._key = key
-        self._attr_name = f"{coordinator.data.get('device_name','Kodi')} - {SENSOR_TYPES[key]['name']}"
+        
+        # force entity_id based on friendly_name
+        fname = entry.data.get("friendly_name", "Kodi")
+        self.entity_id = f"sensor.{slugify(fname)}_{key}"
+        
+        self._attr_name = f"{fname} - {SENSOR_TYPES[key]['name']}"
         self._attr_icon = SENSOR_TYPES[key]['icon']
         self._attr_unique_id = f"{entry.entry_id}_{key}"
 
     @property
     def native_value(self):
-        # get value safely
         return self.coordinator.data.get(self._key)
 
     @property

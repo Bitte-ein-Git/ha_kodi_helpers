@@ -1,0 +1,118 @@
+name: "🗿 » Release 'Kodi-Helpers 🍿'"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Bitte-ein-Git/action_clear-runs@main
+
+  validate-hassfest:
+    name: ☑️ Validate with hassfest
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout code
+        uses: "actions/checkout@v4"
+      - name: Run hassfest validation
+        uses: "home-assistant/actions/hassfest@master"
+
+  validate-hacs:
+    name: ☑️ Validate with HACS
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout code
+        uses: "actions/checkout@v4"
+      - name: Run HACS validation
+        uses: "hacs/action@main"
+        with:
+          category: "integration"
+
+  release:
+    name: ✅ Create Release
+    runs-on: ubuntu-latest
+    needs: [validate-hassfest, validate-hacs]
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/dev')
+    permissions:
+      contents: write # Required to create tags and releases
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required to check for existing tags properly
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Get version details
+        id: get_version
+        run: |
+          # Get version from manifest
+          VERSION=$(jq -r .version custom_components/kodi_helpers/manifest.json)
+          TAG_NAME="v$VERSION"
+          
+          # Set environment variables for subsequent steps
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "RELEASE_TITLE=Kodi-Helpers 🍿 v$VERSION">> $GITHUB_ENV
+
+      - name: Check for existing tag
+        id: check_tag
+        run: |
+          # Check if tag exists remotely
+          if git ls-remote --exit-code --tags origin "refs/tags/${{ env.TAG_NAME }}" >/dev/null 2>&1; then
+            echo "Tag ${{ env.TAG_NAME }} already exists. Skipping release."
+            echo "SKIP=true" >> $GITHUB_ENV
+          else
+            echo "Tag ${{ env.TAG_NAME }} does not exist. Proceeding."
+            echo "SKIP=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create and Push Tag
+        if: env.SKIP == 'false'
+        run: |
+          # Configure git user
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Create annotated tag
+          git tag -a "${{ env.TAG_NAME }}" -m "${{ env.RELEASE_TITLE }}"
+          
+          # Push the tag
+          git push origin "${{ env.TAG_NAME }}"
+
+      - name: Create Release Body
+        if: env.SKIP == 'false'
+        run: |
+          # Create markdown file for release notes
+          cat << EOF > release_body.md
+          # 🌀 ›› *${{ env.VERSION }}* released! • 🗿
+
+          EOF
+
+      - name: ZIP Component Dir
+        if: env.SKIP == 'false'
+        run: |
+          # Navigate to component directory
+          cd ${{ github.workspace }}/custom_components/kodi_helpers
+          
+          # Create zip archive
+          zip -r kodi_helpers.zip ./
+          
+          # Move zip to workspace root
+          mv kodi_helpers.zip ${{ github.workspace }}/kodi_helpers.zip
+
+      - name: Create Release
+        if: env.SKIP == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create GitHub release using the pushed tag
+          gh release create ${{ env.TAG_NAME }} \
+            --title "${{ env.RELEASE_TITLE }}" \
+            --notes-file release_body.md \
+            ${{ github.workspace }}/kodi_helpers.zip#kodi_helpers.zip

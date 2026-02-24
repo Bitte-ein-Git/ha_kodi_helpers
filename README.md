@@ -1,6 +1,6 @@
 <div align="center">
   <br>
-  <img src="https://github.com/Bitte-ein-Git/ha_kodi_helpers/blob/main/img/repo.png" alt="Logo" width="256">
+  <img src="https://github.com/Bitte-ein-Git/ha_kodi_helpers/blob/main/img/repo.png?raw=true" alt="Logo" width="256">
   <br><br>
 </div>
 
@@ -8,7 +8,7 @@
   <ul align="center" style="list-style: none">
     <summary>
       <h1 style="border-bottom: 0; display: inline-block;">
-        <b>🗿• Kodi-Helpers 🍿</b></br>
+        <b>Kodi-Helpers 🍿</b></br>
           <sub><i><u>Home Assistant Integration</i> 🏡</u></sub></h1>
     </summary>
   </ul>

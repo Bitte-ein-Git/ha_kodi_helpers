@@ -26,11 +26,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         "username": entry.data.get("username"),
         "password": entry.data.get("password"),
         "scheme": entry.options.get("scheme", entry.data.get("scheme", "http")),
+        "friendly_name": entry.data.get("friendly_name", "Kodi")
     }
     
     api = KodiAPI(cfg['host'], cfg['port'], cfg['username'], cfg['password'], scheme=cfg['scheme'])
 
-    # Hardcoded English strings - no more json loading
     TXT = {
         "no_playback": "No Playback",
         "no_audio_info": "No Audio Info",
@@ -41,6 +41,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         "movie": "🎬 Movie",
         "tv_show": "🎞️ TV Show",
         "live_tv": "📺 Live TV",
+        "music": "🎵 Music",
+        "music_video": "🎞️ Music video",
+        "unknown": "⏯️ Unknown",
         "keyboard": "⌨️ Keyboard"
     }
 
@@ -51,25 +54,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
             'main_info': TXT['kodi_offline'],
             'extra_info': TXT['kodi_offline'],
             'audio_info': TXT['kodi_offline'],
-            'device_name': f"🍿• Kodi-Helper ({cfg.get('host')})",
+            'device_name': cfg['friendly_name'],
             'keyboard_visible': False
         }
 
-        # check kodi connection & properties
         app = await api.get_app_properties()
         if not app or 'result' not in app:
             return data
 
-        data['device_name'] = app['result'].get('name') or data['device_name']
-
-        # check keyboard
         gui = await api.get_gui_properties()
         if gui and 'result' in gui:
-            # 10103=VirtualKeyboard, 10104=NumericInput
             win_id = gui['result'].get('currentwindow', {}).get('id')
             data['keyboard_visible'] = win_id in [10103, 10104]
 
-        # check playback
         players = await api.get_player()
         if not players or not players.get('result'):
             data.update({
@@ -100,7 +97,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
                     extra_info = f"S{int(match.group(2)):02d}E{int(match.group(3)):02d}"
 
             if not main_info:
-                if item.get('channeltype') == 'tv' or item.get('channel'):
+                # parse music and music videos
+                if item.get('type') in ['song', 'music']:
+                    media_type = TXT['music']
+                    raw_type = 'music'
+                    main_info = item.get('title') or item.get('label') or TXT['unknown']
+                    artists = item.get('artist')
+                    extra_info = ", ".join(artists) if artists else media_type
+                elif item.get('type') == 'musicvideo':
+                    media_type = TXT['music_video']
+                    raw_type = 'musicvideo'
+                    main_info = item.get('title') or item.get('label') or TXT['unknown']
+                    artists = item.get('artist')
+                    extra_info = ", ".join(artists) if artists else media_type
+                elif item.get('channeltype') == 'tv' or item.get('channel'):
                     media_type = TXT['live_tv']
                     raw_type = 'tv'
                     main_info = (item.get('channel') or TXT['live_tv']) + ' ᴵᴾᵀⱽ'
@@ -129,6 +139,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
             if 'S-1E-1' in extra_info:
                 extra_info = ''
+
+            # parse chapters if available
+            if audio_data and 'result' in audio_data and raw_type == 'movie':
+                cur_chap = audio_data['result'].get('currentchapter')
+                tot_chap = audio_data['result'].get('chapters')
+                if cur_chap is not None and tot_chap and tot_chap > 0:
+                    chapter_str = f"Chapter: {cur_chap}/{tot_chap}"
+                    # check if api ever provides chaptername in the future
+                    if audio_data['result'].get('chaptername'):
+                        chapter_str += f" — {audio_data['result']['chaptername']}"
+                    extra_info = chapter_str
 
             no_tags = re.sub(r'\[.*?\]', '', main_info)
             no_zero = re.sub(r'\s*\(0\)', '', no_tags)
